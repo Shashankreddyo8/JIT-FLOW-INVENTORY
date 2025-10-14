@@ -1,1 +1,10 @@
 project_id = "qdtyerhhfqpwxddkbvmn"
+
+[functions.forecast-demand]
+verify_jwt = true
+
+[functions.recommend-purchase]
+verify_jwt = true
+
+[functions.analyze-supplier]
+verify_jwt = true

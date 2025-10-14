@@ -5,10 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Search, Package, TrendingUp, AlertCircle } from "lucide-react";
+import { Plus, Search, Package, TrendingUp, AlertCircle, Scan } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { HelpTooltip } from "@/components/HelpTooltip";
 
 const Inventory = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -21,6 +23,7 @@ const Inventory = () => {
     sku: "",
     description: "",
     category: "",
+    barcode: "",
     current_quantity: 0,
     reorder_point: 10,
     optimal_quantity: 100,
@@ -68,6 +71,18 @@ const Inventory = () => {
     }
   };
 
+  const handleScan = (barcode: string) => {
+    const foundItem = items.find(item => item.barcode === barcode);
+    if (foundItem) {
+      toast.success(`Found: ${foundItem.name}`);
+      setSearchTerm(foundItem.name);
+    } else {
+      toast.info(`No item found with barcode: ${barcode}. Add it as a new item?`);
+      setFormData({ ...formData, barcode });
+      setIsAddDialogOpen(true);
+    }
+  };
+
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -89,6 +104,7 @@ const Inventory = () => {
         sku: "",
         description: "",
         category: "",
+        barcode: "",
         current_quantity: 0,
         reorder_point: 10,
         optimal_quantity: 100,
@@ -119,10 +135,15 @@ const Inventory = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
+            <HelpTooltip content="Manage your inventory items. Use barcode scanner for quick lookup or add new items manually." />
+          </div>
           <p className="text-muted-foreground">Track and manage your inventory items</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <div className="flex gap-2">
+          <BarcodeScanner onScan={handleScan} />
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-primary to-primary-glow">
               <Plus className="mr-2 h-4 w-4" />
@@ -160,6 +181,15 @@ const Inventory = () => {
                     id="category"
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="barcode">Barcode</Label>
+                  <Input
+                    id="barcode"
+                    value={formData.barcode}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                    placeholder="Optional"
                   />
                 </div>
                 <div className="space-y-2">
@@ -253,6 +283,7 @@ const Inventory = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="relative">

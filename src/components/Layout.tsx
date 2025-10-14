@@ -13,6 +13,8 @@ import {
   LogOut,
   Menu,
   X,
+  Trophy,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +64,11 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/orders", icon: ShoppingCart, label: "Orders" },
     { path: "/suppliers", icon: TruckIcon, label: "Suppliers" },
     { path: "/alerts", icon: Bell, label: "Alerts" },
+  ];
+
+  const secondaryItems = [
+    { path: "/achievements", icon: Trophy, label: "Achievements" },
+    { path: "/help", icon: HelpCircle, label: "Help Center" },
   ];
 
   return (
