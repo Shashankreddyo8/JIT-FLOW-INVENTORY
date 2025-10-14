@@ -149,6 +149,26 @@ const Layout = ({ children }: LayoutProps) => {
               </Link>
             ))}
           </nav>
+          
+          <div className="px-4 py-2 border-t border-border">
+            <p className="text-xs font-medium text-muted-foreground mb-2">More</p>
+            <nav className="space-y-1">
+              {secondaryItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    location.pathname === item.path
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
         </aside>
 
         {/* Main Content */}

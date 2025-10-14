@@ -10,6 +10,8 @@ import Inventory from "./pages/Inventory";
 import Orders from "./pages/Orders";
 import Suppliers from "./pages/Suppliers";
 import Alerts from "./pages/Alerts";
+import Achievements from "./pages/Achievements";
+import HelpCenter from "./pages/HelpCenter";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
