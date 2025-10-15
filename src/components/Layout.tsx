@@ -15,6 +15,11 @@ import {
   X,
   Trophy,
   HelpCircle,
+  UserCog,
+  UsersRound,
+  Leaf,
+  Navigation,
+  TrendingDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +69,17 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/orders", icon: ShoppingCart, label: "Orders" },
     { path: "/suppliers", icon: TruckIcon, label: "Suppliers" },
     { path: "/alerts", icon: Bell, label: "Alerts" },
+  ];
+
+  const advancedModules = [
+    { path: "/cost-optimization", icon: TrendingDown, label: "Cost Optimization" },
+    { path: "/sustainability", icon: Leaf, label: "Sustainability" },
+    { path: "/route-optimizer", icon: Navigation, label: "Route Optimizer" },
+  ];
+
+  const portalItems = [
+    { path: "/supplier-portal", icon: UserCog, label: "Supplier Portal" },
+    { path: "/customer-portal", icon: UsersRound, label: "Customer Portal" },
   ];
 
   const secondaryItems = [
@@ -139,37 +155,43 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="container flex">
         {/* Sidebar */}
         <aside className="hidden md:flex flex-col w-64 border-r bg-card/50 min-h-[calc(100vh-4rem)] sticky top-16">
-          <nav className="flex-1 p-4 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                  location.pathname === item.path
-                    ? "bg-primary text-primary-foreground shadow-lg"
-                    : "hover:bg-muted"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.label}
-              </Link>
-            ))}
+          <nav className="flex-1 p-4 space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2 px-2">MAIN</p>
+              {navItems.map((item) => (
+                <Link key={item.path} to={item.path} className={cn("flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors", location.pathname === item.path ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-muted")}>
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2 px-2">ADVANCED</p>
+              {advancedModules.map((item) => (
+                <Link key={item.path} to={item.path} className={cn("flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors", location.pathname === item.path ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-muted")}>
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground mb-2 px-2">PORTALS</p>
+              {portalItems.map((item) => (
+                <Link key={item.path} to={item.path} className={cn("flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors", location.pathname === item.path ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-muted")}>
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </nav>
           
           <div className="px-4 py-2 border-t border-border">
             <p className="text-xs font-medium text-muted-foreground mb-2">More</p>
             <nav className="space-y-1">
               {secondaryItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    location.pathname === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
-                >
+                <Link key={item.path} to={item.path} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${location.pathname === item.path ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
                   <item.icon className="h-5 w-5" />
                   <span className="font-medium">{item.label}</span>
                 </Link>

@@ -8,3 +8,9 @@ verify_jwt = true
 
 [functions.analyze-supplier]
 verify_jwt = true
+
+[functions.cost-optimizer]
+verify_jwt = true
+
+[functions.route-planner]
+verify_jwt = true
