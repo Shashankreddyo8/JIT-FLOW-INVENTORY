@@ -9,6 +9,9 @@ export const formatINR = (amount: number): string => {
   }).format(amount);
 };
 
+// Alias for consistency
+export const formatIndianCurrency = formatINR;
+
 export const formatINRCompact = (amount: number): string => {
   if (amount >= 10000000) {
     return `₹${(amount / 10000000).toFixed(2)}Cr`;

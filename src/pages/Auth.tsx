@@ -17,9 +17,20 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        navigate("/");
+        // Check if user has admin role
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id);
+        
+        if (roles && roles.length > 0 && (roles.some(r => r.role === 'admin' || r.role === 'manager'))) {
+          navigate("/dashboard");
+        } else {
+          toast.error("Access denied. Admin privileges required.");
+          await supabase.auth.signOut();
+        }
       }
     });
 
@@ -73,12 +84,12 @@ const Auth = () => {
             <Package className="h-8 w-8 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-bold">
-            {isLogin ? "Welcome Back" : "Create Account"}
+            Administrator Login
           </CardTitle>
           <CardDescription>
             {isLogin
-              ? "Sign in to access your JIT inventory management"
-              : "Get started with your inventory management platform"}
+              ? "Sign in with your admin credentials to access the dashboard"
+              : "Contact your system administrator for access"}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleAuth}>

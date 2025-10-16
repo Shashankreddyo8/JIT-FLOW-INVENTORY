@@ -34,19 +34,48 @@ const Layout = ({ children }: LayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const checkAdminAccess = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
         navigate("/auth");
-      } else {
-        setUserEmail(session.user.email || "");
+        return;
       }
-    });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+      // Check if user has admin or manager role
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id);
+
+      if (!roles || roles.length === 0 || !roles.some(r => ['admin', 'manager'].includes(r.role))) {
+        toast.error("Access denied. Admin privileges required.");
+        await supabase.auth.signOut();
+        navigate("/auth");
+        return;
+      }
+
+      setUserEmail(session.user.email || "Admin");
+    };
+
+    checkAdminAccess();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!session) {
         navigate("/auth");
       } else {
-        setUserEmail(session.user.email || "");
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id);
+
+        if (!roles || !roles.some(r => ['admin', 'manager'].includes(r.role))) {
+          toast.error("Access denied. Admin privileges required.");
+          await supabase.auth.signOut();
+          navigate("/auth");
+        } else {
+          setUserEmail(session.user.email || "Admin");
+        }
       }
     });
 
@@ -64,7 +93,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   const navItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard" },
+    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { path: "/inventory", icon: Package, label: "Inventory" },
     { path: "/orders", icon: ShoppingCart, label: "Orders" },
     { path: "/suppliers", icon: TruckIcon, label: "Suppliers" },
