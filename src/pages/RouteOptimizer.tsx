@@ -136,10 +136,9 @@ const RouteOptimizer = () => {
                   <Label>Preferred Courier (Optional)</Label>
                   <Select value={formData.courierPreference} onValueChange={(v) => setFormData({...formData, courierPreference: v})}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select courier" />
+                      <SelectValue placeholder="Any Courier" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any Courier</SelectItem>
                       {INDIAN_COURIERS.map((courier) => (
                         <SelectItem key={courier} value={courier}>{courier}</SelectItem>
                       ))}
