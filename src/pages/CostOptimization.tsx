@@ -14,6 +14,16 @@ const CostOptimization = () => {
 
   useEffect(() => {
     fetchRecommendations();
+
+    // Realtime updates
+    const channel = supabase
+      .channel('cost-recommendations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'cost_optimization_recommendations' }, fetchRecommendations)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchRecommendations = async () => {
@@ -21,7 +31,7 @@ const CostOptimization = () => {
     try {
       const { data } = await supabase
         .from('cost_optimization_recommendations')
-        .select('*')
+        .select('*, inventory_items(name, sku)')
         .order('generated_at', { ascending: false });
 
       setRecommendations(data || []);
@@ -36,11 +46,29 @@ const CostOptimization = () => {
   const generateRecommendations = async () => {
     setGenerating(true);
     try {
-      const { error } = await supabase.functions.invoke('cost-optimizer');
+      // Get inventory items to analyze
+      const { data: items } = await supabase
+        .from('inventory_items')
+        .select('id')
+        .gt('current_quantity', 0)
+        .limit(10);
 
-      if (error) throw error;
+      if (!items || items.length === 0) {
+        toast.error('No inventory items to analyze');
+        setGenerating(false);
+        return;
+      }
 
-      toast.success('Cost optimization analysis complete!');
+      // Analyze first few items
+      let analyzed = 0;
+      for (const item of items.slice(0, 5)) {
+        const { error } = await supabase.functions.invoke('cost-optimizer', {
+          body: { inventoryItemId: item.id }
+        });
+        if (!error) analyzed++;
+      }
+
+      toast.success(`Analysis complete! Generated ${analyzed} recommendations.`);
       await fetchRecommendations();
     } catch (error: any) {
       console.error('Generation error:', error);
@@ -192,7 +220,7 @@ const CostOptimization = () => {
                   <Card key={rec.id} className={rec.status !== 'pending' ? 'opacity-60' : ''}>
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
+                       <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <Badge className={getRecommendationTypeColor(rec.recommendation_type)}>
                               {rec.recommendation_type.replace('_', ' ').toUpperCase()}
@@ -202,11 +230,15 @@ const CostOptimization = () => {
                             </Badge>
                           </div>
 
+                          <div className="text-sm text-muted-foreground mb-2">
+                            Item: {rec.inventory_items?.name} ({rec.inventory_items?.sku})
+                          </div>
+
                           <div className="mb-3">
                             <div className="font-semibold text-lg mb-1">
                               {rec.details?.description || 'Cost optimization opportunity'}
                             </div>
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-4 text-sm flex-wrap">
                               <span className="text-muted-foreground">
                                 Current: {formatINR(Number(rec.current_cost))}
                               </span>
@@ -219,7 +251,7 @@ const CostOptimization = () => {
                             </div>
                           </div>
 
-                          {rec.details?.action_steps && (
+                          {rec.details?.action_steps && Array.isArray(rec.details.action_steps) && (
                             <div className="bg-muted/30 p-3 rounded-lg mb-2">
                               <div className="text-sm font-semibold mb-2">Action Steps:</div>
                               <ol className="text-sm space-y-1 list-decimal list-inside">
@@ -227,6 +259,12 @@ const CostOptimization = () => {
                                   <li key={idx}>{step}</li>
                                 ))}
                               </ol>
+                            </div>
+                          )}
+
+                          {rec.details?.recommendation && (
+                            <div className="text-sm text-muted-foreground mb-2">
+                              {rec.details.recommendation}
                             </div>
                           )}
 

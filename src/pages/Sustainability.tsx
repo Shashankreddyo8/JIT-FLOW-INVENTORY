@@ -27,6 +27,23 @@ const Sustainability = () => {
 
   useEffect(() => {
     fetchData();
+    calculateAutomaticMetrics();
+
+    // Realtime updates
+    const wasteChannel = supabase
+      .channel('waste-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'waste_analytics' }, fetchData)
+      .subscribe();
+
+    const metricsChannel = supabase
+      .channel('metrics-updates')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sustainability_metrics' }, fetchData)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(wasteChannel);
+      supabase.removeChannel(metricsChannel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -42,6 +59,53 @@ const Sustainability = () => {
 
     setWasteData(waste || []);
     setSustainabilityMetrics(metrics || []);
+  };
+
+  const calculateAutomaticMetrics = async () => {
+    try {
+      // Calculate carbon emissions from delivery routes
+      const { data: routes } = await supabase
+        .from('delivery_routes')
+        .select('carbon_emissions')
+        .not('carbon_emissions', 'is', null);
+
+      const totalCarbon = routes?.reduce((sum, route) => sum + Number(route.carbon_emissions || 0), 0) || 0;
+
+      // Calculate waste from low-stock items (potential waste from overstocking)
+      const { data: inventory } = await supabase
+        .from('inventory_items')
+        .select('current_quantity, optimal_quantity, name');
+
+      let excessStock = 0;
+      inventory?.forEach(item => {
+        const excess = Math.max(0, item.current_quantity - item.optimal_quantity);
+        excessStock += excess;
+      });
+
+      // Auto-generate sustainability insights
+      if (totalCarbon > 0) {
+        const now = new Date().toISOString().split('T')[0];
+        
+        // Check if today's metric already exists
+        const { data: existing } = await supabase
+          .from('sustainability_metrics')
+          .select('id')
+          .eq('metric_type', 'carbon_footprint')
+          .eq('assessed_date', now)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from('sustainability_metrics').insert({
+            metric_type: 'carbon_footprint',
+            metric_value: totalCarbon,
+            measurement_unit: 'kg CO₂',
+            assessed_date: now
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error calculating metrics:', error);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,7 +125,18 @@ const Sustainability = () => {
 
     toast.success('Waste recorded successfully');
     setOpen(false);
+    setFormData({
+      inventory_item_id: '',
+      waste_quantity: '',
+      waste_reason: '',
+      waste_type: 'damaged',
+      carbon_footprint: '',
+      recyclable: false,
+      disposal_cost: '',
+      notes: ''
+    });
     fetchData();
+    calculateAutomaticMetrics();
   };
 
   const wasteByType = wasteData.reduce((acc: any, item) => {

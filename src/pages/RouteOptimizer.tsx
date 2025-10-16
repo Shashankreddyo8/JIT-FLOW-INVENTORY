@@ -43,6 +43,15 @@ const RouteOptimizer = () => {
 
       setRouteData(data);
       toast.success('Route optimized successfully!');
+      
+      // Reset form
+      setFormData({
+        originAddress: '',
+        originPincode: '',
+        destinationAddress: '',
+        destinationPincode: '',
+        courierPreference: ''
+      });
     } catch (error: any) {
       console.error('Route optimization error:', error);
       toast.error(error.message || 'Failed to optimize route');

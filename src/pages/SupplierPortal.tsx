@@ -140,7 +140,7 @@ const SupplierPortal = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="text-2xl font-bold">
-                {orders.filter(o => o.status === 'shipped').length}
+                {orders.filter(o => o.status === 'in_transit').length}
               </div>
               <div className="text-sm text-muted-foreground">In Transit</div>
             </CardContent>
