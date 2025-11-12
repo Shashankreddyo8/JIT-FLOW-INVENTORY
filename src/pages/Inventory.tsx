@@ -13,8 +13,142 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { HelpTooltip } from "@/components/HelpTooltip";
 
 const Inventory = () => {
-  const [items, setItems] = useState<any[]>([]);
-  const [suppliers, setSuppliers] = useState<any[]>([]);
+  // Hardcoded suppliers data
+  const [suppliers, setSuppliers] = useState<any[]>([
+    {
+      id: "1",
+      name: "VASUMATHI ELECTRONIC",
+      contact_person: "VASUNDHARA",
+      email: "VASU890@GMAIL.COM",
+      phone: "9877655",
+      address: "EAST ANDHERI MUMBAI MAHARASTRA",
+      rating: 4.5,
+      average_delivery_days: 3,
+      total_orders: 25
+    },
+    {
+      id: "2",
+      name: "TechParts Supply Co.",
+      contact_person: "John Anderson",
+      email: "john@techparts.com",
+      phone: "+1-555-0101",
+      address: "123 Industrial Blvd, Austin, TX",
+      rating: 4.50,
+      average_delivery_days: 7,
+      total_orders: 45
+    },
+    {
+      id: "3",
+      name: "Global Components Ltd.",
+      contact_person: "Sarah Chen",
+      email: "sarah@globalcomp.com",
+      phone: "+1-555-0102",
+      address: "456 Trade Ave, San Jose, CA",
+      rating: 4.80,
+      average_delivery_days: 5,
+      total_orders: 78
+    }
+  ]);
+
+  // Hardcoded inventory items
+  const [items, setItems] = useState<any[]>([
+    {
+      id: "1",
+      sku: "ELC-001",
+      name: "Circuit Breaker 32A",
+      description: "Miniature Circuit Breaker for electrical protection",
+      category: "Electrical",
+      current_quantity: 150,
+      reorder_point: 30,
+      optimal_quantity: 200,
+      unit_cost: 450.00,
+      barcode: "BC100000001",
+      location: "Warehouse A - Electrical Section",
+      hsn_code: "8535",
+      gst_rate: 18.00,
+      supplier_id: "1",
+      suppliers: { name: "VASUMATHI ELECTRONIC" },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "2",
+      sku: "ELC-002",
+      name: "Electrical Switch 16A",
+      description: "Single pole electrical switch with LED indicator",
+      category: "Electrical",
+      current_quantity: 75,
+      reorder_point: 25,
+      optimal_quantity: 150,
+      unit_cost: 180.00,
+      barcode: "BC100000002",
+      location: "Warehouse A - Electrical Section",
+      hsn_code: "8536",
+      gst_rate: 18.00,
+      supplier_id: "1",
+      suppliers: { name: "VASUMATHI ELECTRONIC" },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "3",
+      sku: "AUTO-001",
+      name: "Brake Pad Set",
+      description: "Ceramic brake pads for front wheels",
+      category: "Automotive",
+      current_quantity: 60,
+      reorder_point: 20,
+      optimal_quantity: 100,
+      unit_cost: 2200.00,
+      barcode: "BC200000001",
+      location: "Warehouse B - Automotive Section",
+      hsn_code: "8708",
+      gst_rate: 28.00,
+      supplier_id: "2",
+      suppliers: { name: "TechParts Supply Co." },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "4",
+      sku: "CBL-001",
+      name: "Power Cable 2.5 sqmm",
+      description: "Copper power cable for electrical wiring",
+      category: "Cables",
+      current_quantity: 500,
+      reorder_point: 100,
+      optimal_quantity: 800,
+      unit_cost: 85.00,
+      barcode: "BC300000001",
+      location: "Warehouse C - Cable Section",
+      hsn_code: "8544",
+      gst_rate: 18.00,
+      supplier_id: "3",
+      suppliers: { name: "Global Components Ltd." },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "5",
+      sku: "WR-001",
+      name: "Copper Wire 1.0 sqmm",
+      description: "Single core copper wire for electrical connections",
+      category: "Wires",
+      current_quantity: 600,
+      reorder_point: 150,
+      optimal_quantity: 1000,
+      unit_cost: 35.00,
+      barcode: "BC400000001",
+      location: "Warehouse C - Wire Section",
+      hsn_code: "8544",
+      gst_rate: 18.00,
+      supplier_id: "1",
+      suppliers: { name: "VASUMATHI ELECTRONIC" },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,43 +167,9 @@ const Inventory = () => {
   });
 
   useEffect(() => {
-    fetchInventory();
-    fetchSuppliers();
-
-    const channel = supabase
-      .channel('inventory-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_items' }, () => {
-        fetchInventory();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    console.log('Inventory component mounted with hardcoded data');
   }, []);
 
-  const fetchInventory = async () => {
-    const { data, error } = await supabase
-      .from("inventory_items")
-      .select("*, suppliers(name)")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast.error("Failed to fetch inventory");
-    } else {
-      setItems(data || []);
-    }
-  };
-
-  const fetchSuppliers = async () => {
-    const { data, error } = await supabase
-      .from("suppliers")
-      .select("*");
-
-    if (!error && data) {
-      setSuppliers(data);
-    }
-  };
 
   const handleScan = (barcode: string) => {
     const foundItem = items.find(item => item.barcode === barcode);
@@ -87,33 +187,38 @@ const Inventory = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.from("inventory_items").insert([
-      {
-        ...formData,
-        supplier_id: formData.supplier_id || null,
-      },
-    ]);
+    console.log('Adding new inventory item:', formData);
 
-    if (error) {
-      toast.error("Failed to add item");
-    } else {
-      toast.success("Item added successfully");
-      setIsAddDialogOpen(false);
-      setFormData({
-        name: "",
-        sku: "",
-        description: "",
-        category: "",
-        barcode: "",
-        current_quantity: 0,
-        reorder_point: 10,
-        optimal_quantity: 100,
-        unit_cost: 0,
-        supplier_id: "",
-        location: "",
-      });
-      fetchInventory();
-    }
+    // Find supplier name for the new item
+    const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id);
+    
+    // Add new item to the hardcoded array
+    const newItem = {
+      id: (items.length + 1).toString(),
+      ...formData,
+      hsn_code: "",
+      gst_rate: 18.00,
+      suppliers: { name: selectedSupplier?.name || "" },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    setItems([...items, newItem]);
+    toast.success("Item added successfully");
+    setIsAddDialogOpen(false);
+    setFormData({
+      name: "",
+      sku: "",
+      description: "",
+      category: "",
+      barcode: "",
+      current_quantity: 0,
+      reorder_point: 10,
+      optimal_quantity: 100,
+      unit_cost: 0,
+      supplier_id: "",
+      location: "",
+    });
     setIsLoading(false);
   };
 

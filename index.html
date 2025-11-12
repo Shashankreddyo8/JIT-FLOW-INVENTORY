@@ -18,7 +18,34 @@
   </head>
 
   <body>
+  <!-- Note: static debug banner removed. If the app fails to load, the dynamic loader will render a visible fallback UI into #root. -->
     <div id="root"></div>
+    <!-- Robust loader: attempt to dynamically import Vite client + main module; if it fails, show a visible fallback UI -->
+    <script type="module">
+      (async () => {
+        try {
+          // Ensure vite client is loaded for HMR when available
+          try { await import('/@vite/client'); } catch (e) { /* ignore if not available */ }
+
+          // Try to import the app entry. If this fails, we'll render a fallback so the page isn't blank.
+          await import('/src/main.tsx');
+          console.log('App module loaded successfully');
+        } catch (err) {
+          console.error('Failed to load app module:', err);
+          const root = document.getElementById('root');
+          if (root) {
+            root.innerHTML = `
+              <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:#fff;">
+                <h1 style="color:#b91c1c;margin:0 0 12px 0;">Fallback UI — React failed to load</h1>
+                <p style="color:#374151;margin:0 0 12px 0;">The dev server served index.html but the app module failed to load. Check the browser console for details.</p>
+                <pre style="white-space:pre-wrap;max-width:800px;background:#f3f4f6;padding:12px;border-radius:6px;color:#111;overflow:auto;">${String(err).slice(0,2000)}</pre>
+                <p style="margin-top:12px;color:#374151">You can still open the app files in the editor; I'll help fix the import error if you paste the console output.</p>
+              </div>
+            `;
+          }
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

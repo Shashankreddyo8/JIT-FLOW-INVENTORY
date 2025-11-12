@@ -10,7 +10,78 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 
 const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState<any[]>([]);
+  // Hardcoded suppliers data
+  const [suppliers, setSuppliers] = useState<any[]>([
+    {
+      id: "1",
+      name: "VASUMATHI ELECTRONIC",
+      contact_person: "VASUNDHARA",
+      email: "VASU890@GMAIL.COM",
+      phone: "9877655",
+      address: "EAST ANDHERI MUMBAI MAHARASTRA",
+      rating: 4.5,
+      average_delivery_days: 3,
+      total_orders: 25,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      gst_number: "27AABCU9603R1Z5",
+      pan_number: "AABCU9603R",
+      state: "Maharashtra",
+      pincode: "400069"
+    },
+    {
+      id: "2",
+      name: "TechParts Supply Co.",
+      contact_person: "John Anderson",
+      email: "john@techparts.com",
+      phone: "+1-555-0101",
+      address: "123 Industrial Blvd, Austin, TX",
+      rating: 4.50,
+      average_delivery_days: 7,
+      total_orders: 45,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      gst_number: "",
+      pan_number: "",
+      state: "",
+      pincode: ""
+    },
+    {
+      id: "3",
+      name: "Global Components Ltd.",
+      contact_person: "Sarah Chen",
+      email: "sarah@globalcomp.com",
+      phone: "+1-555-0102",
+      address: "456 Trade Ave, San Jose, CA",
+      rating: 4.80,
+      average_delivery_days: 5,
+      total_orders: 78,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      gst_number: "",
+      pan_number: "",
+      state: "",
+      pincode: ""
+    },
+    {
+      id: "4",
+      name: "FastShip Logistics",
+      contact_person: "Mike Rodriguez",
+      email: "mike@fastship.com",
+      phone: "+1-555-0103",
+      address: "789 Supply St, Chicago, IL",
+      rating: 4.20,
+      average_delivery_days: 9,
+      total_orders: 32,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      gst_number: "",
+      pan_number: "",
+      state: "",
+      pincode: ""
+    }
+  ]);
+  
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,42 +93,40 @@ const Suppliers = () => {
   });
 
   useEffect(() => {
-    fetchSuppliers();
+    console.log('Suppliers component mounted with hardcoded data');
   }, []);
-
-  const fetchSuppliers = async () => {
-    const { data, error } = await supabase
-      .from("suppliers")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast.error("Failed to fetch suppliers");
-    } else {
-      setSuppliers(data || []);
-    }
-  };
 
   const handleAddSupplier = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.from("suppliers").insert([formData]);
+    console.log('Adding new supplier:', formData);
 
-    if (error) {
-      toast.error("Failed to add supplier");
-    } else {
-      toast.success("Supplier added successfully");
-      setIsAddDialogOpen(false);
-      setFormData({
-        name: "",
-        contact_person: "",
-        email: "",
-        phone: "",
-        address: "",
-      });
-      fetchSuppliers();
-    }
+    // Add new supplier to the hardcoded array
+    const newSupplier = {
+      id: (suppliers.length + 1).toString(),
+      ...formData,
+      rating: 4.0,
+      average_delivery_days: 5,
+      total_orders: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      gst_number: "",
+      pan_number: "",
+      state: "",
+      pincode: ""
+    };
+
+    setSuppliers([...suppliers, newSupplier]);
+    toast.success("Supplier added successfully");
+    setIsAddDialogOpen(false);
+    setFormData({
+      name: "",
+      contact_person: "",
+      email: "",
+      phone: "",
+      address: "",
+    });
     setIsLoading(false);
   };
 
@@ -136,6 +205,7 @@ const Suppliers = () => {
           </DialogContent>
         </Dialog>
       </div>
+
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {suppliers.map((supplier) => (

@@ -1,0 +1,4 @@
+id;name;contact_person;email;phone;address;rating;average_delivery_days;total_orders;created_at;updated_at;gst_number;pan_number;state;pincode
+f2efff27-8468-4a98-b2e6-6d52678f3f8b;TechParts Supply Co.;John Anderson;john@techparts.com;	+1-555-0101;123 Industrial Blvd, Austin, TX;4.50;7;45;2025-10-14 01:48:06.264556+00;2025-10-14 01:48:06.264556+00;;;;
+8b42eb47-b0b7-42a5-ab4d-561984495d0f;Global Components Ltd.;Sarah Chen;sarah@globalcomp.com;	+1-555-0102;456 Trade Ave, San Jose, CA;4.80;5;78;2025-10-14 01:48:06.264556+00;2025-10-14 01:48:06.264556+00;;;;
+d2be2c80-7bf3-430e-abd7-b90b16d498d7;FastShip Logistics;Mike Rodriguez;mike@fastship.com;	+1-555-0103;789 Supply St, Chicago, IL;4.20;9;32;2025-10-14 01:48:06.264556+00;2025-10-14 01:48:06.264556+00;;;;

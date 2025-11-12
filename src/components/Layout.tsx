@@ -1,25 +1,20 @@
-import { ReactNode, useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { ReactNode, useState } from "react";
+import { useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "sonner";
 import {
   LayoutDashboard,
   Package,
   ShoppingCart,
   TruckIcon,
   Bell,
-  LogOut,
   Menu,
   X,
   Trophy,
   HelpCircle,
-  UserCog,
-  UsersRound,
   Leaf,
   Navigation,
   TrendingDown,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,69 +23,8 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [userEmail, setUserEmail] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const checkAdminAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-
-      // Check if user has admin or manager role
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id);
-
-      if (!roles || roles.length === 0 || !roles.some(r => ['admin', 'manager'].includes(r.role))) {
-        toast.error("Access denied. Admin privileges required.");
-        await supabase.auth.signOut();
-        navigate("/auth");
-        return;
-      }
-
-      setUserEmail(session.user.email || "Admin");
-    };
-
-    checkAdminAccess();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id);
-
-        if (!roles || !roles.some(r => ['admin', 'manager'].includes(r.role))) {
-          toast.error("Access denied. Admin privileges required.");
-          await supabase.auth.signOut();
-          navigate("/auth");
-        } else {
-          setUserEmail(session.user.email || "Admin");
-        }
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
-      toast.success("Signed out successfully");
-      navigate("/auth");
-    }
-  };
 
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -101,15 +35,12 @@ const Layout = ({ children }: LayoutProps) => {
   ];
 
   const advancedModules = [
+    { path: "/auto-orders", icon: Zap, label: "Auto Orders" },
     { path: "/cost-optimization", icon: TrendingDown, label: "Cost Optimization" },
     { path: "/sustainability", icon: Leaf, label: "Sustainability" },
     { path: "/route-optimizer", icon: Navigation, label: "Route Optimizer" },
   ];
 
-  const portalItems = [
-    { path: "/supplier-portal", icon: UserCog, label: "Supplier Portal" },
-    { path: "/customer-portal", icon: UsersRound, label: "Customer Portal" },
-  ];
 
   const secondaryItems = [
     { path: "/achievements", icon: Trophy, label: "Achievements" },
@@ -139,19 +70,7 @@ const Layout = ({ children }: LayoutProps) => {
           </div>
 
           <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {userEmail?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSignOut}
-              className="hover:bg-destructive/10 hover:text-destructive"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <span className="text-sm font-medium">JIT Inventory System</span>
           </div>
         </div>
       </header>
@@ -205,15 +124,6 @@ const Layout = ({ children }: LayoutProps) => {
               ))}
             </div>
 
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-2 px-2">PORTALS</p>
-              {portalItems.map((item) => (
-                <Link key={item.path} to={item.path} className={cn("flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors", location.pathname === item.path ? "bg-primary text-primary-foreground shadow-lg" : "hover:bg-muted")}>
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </Link>
-              ))}
-            </div>
           </nav>
           
           <div className="px-4 py-2 border-t border-border">
