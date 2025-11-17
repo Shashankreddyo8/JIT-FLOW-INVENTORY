@@ -5,7 +5,7 @@ Built by / Team Members:
 - Balaji R
 - Nithin P Gowda
 - Prajwal S K
-- Shashank N (TEAM LEAD)
+- Shashank N 
 
 A comprehensive Just-In-Time (JIT) inventory management system built with React, TypeScript, and modern web technologies. This system provides real-time inventory tracking, supplier management, order processing, and advanced analytics for efficient inventory control.
 
